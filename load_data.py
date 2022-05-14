@@ -21,7 +21,7 @@ def scale_data(df, columns = None):
 
 def get_data(data_link, min = None, max = None):
   #read data
-  in_data = pd.read_csv(data_link)
+  in_data = pd.read_csv(data_link).iloc[:3000]
   in_data = in_data.drop('time', axis=1)
   #change col name
   # in_data.rename(columns = {list(in_data)[0]:'PM2.5'}, inplace=True)

@@ -11,9 +11,10 @@ def median_absolute_percentage_error(actual, predicted):
   return np.median((np.abs(np.subtract(actual, predicted)/ actual))) * 100
 
 class Encoder(nn.Module):
-  def __init__(self, device, input_seq_len, input_size, hidden_size, sc, epochs = 30, batch_size = 32, learning_rate = 0.001, num_layers=1, dropout=0):
+  def __init__(self, device, num_stations, input_size, hidden_size, sc, epochs = 30, batch_size = 32, learning_rate = 0.001, num_layers=1, dropout=0):
     super(Encoder,self).__init__()
     self.device = device
+    self.num_stations = num_stations
     self.input_size = input_size
     self.hidden_size = hidden_size
     self.num_layers = num_layers
@@ -22,13 +23,14 @@ class Encoder(nn.Module):
     self.sc = sc
     self.epochs = epochs
 
-    self.lstm1 = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout)
-    self.lstm2 = nn.LSTM(hidden_size, 256, batch_first=True, dropout=dropout)
+    self.lstm1 = nn.LSTM(input_size*num_stations, hidden_size*num_stations, num_layers, batch_first=True, dropout=dropout)
+    self.lstm2 = nn.LSTM(hidden_size*num_stations, 256*num_stations, batch_first=True, dropout=dropout)
     self.ln = nn.Linear(256, 1)
   
   def forward(self, x):
     out, (h, c) = self.lstm1(x)
-    out, (h, c) = self.lstm2(out)     
+    out, (h, c) = self.lstm2(out)
+    out = torch.reshape(-1, self.num_stations, 256)    
     out = self.ln(out) 
     return out[:, -1, :], (h,c)
   
