@@ -8,7 +8,7 @@ import torch
 input_seq_len = 24
 input_size = 3
 hidden_size = 128
-epochs = 1
+epochs = 200
 batch_size = 32
 learning_rate = 0.0001
 num_layers=1
@@ -29,16 +29,15 @@ if __name__=="__main__":
     list_station = os.listdir(data_path)
     save_results(["Target Station", "MAE", "RMSE", "MAPE", "R2_score", "MDAPE"], log)
     for station in list_station:
-        # if station != "S0000099-Phu Vien.csv":
-        #     continue
         data_link = data_path + station
-        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = 24, output_len = 1, min = None, max = None)
+        station_name = station.split('.')[0]
+        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, min = None, max = None)
         model = Encoder(log, cuda, input_size, hidden_size, sc, epochs = epochs, batch_size = batch_size, learning_rate = learning_rate, num_layers=num_layers, dropout=dropout)
         if cuda:
             model = model.cuda()
         if train:
-            model.train(station, x_train, y_train, x_valid, y_valid)
+            model.train(station_name, x_train, y_train, x_valid, y_valid)
         if test:
-            loss_mae, loss_rmse, loss_mape, r2,loss_mdape, y_predict, y_original = model.test(station, x_test, y_test)
-        save_results([station, loss_mae, loss_rmse, loss_mape, r2, loss_mdape], log)
-        visualize(y_original, y_predict, log, "result_{}.png".format(station.split('.')[0]))
+            loss_mae, loss_rmse, loss_mape, r2,loss_mdape, y_predict, y_original = model.test(station_name, x_test, y_test)
+        save_results([station_name, loss_mae, loss_rmse, loss_mape, r2, loss_mdape], log)
+        visualize(y_original, y_predict, log, "result_{}.png".format(station_name))

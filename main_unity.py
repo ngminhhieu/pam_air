@@ -3,28 +3,29 @@ from model_unity import Encoder
 from utils import *
 import os
 import torch 
+from tqdm import tqdm
 
 #hyper parameters
 input_seq_len = 24
 horizon = 1
 input_size = 3
-hidden_size = 128
-epochs = 200
+hidden_size = 32
+epochs = 1
 batch_size = 32
 learning_rate = 0.0001
 num_layers=1
 dropout=0
 cuda=True
-train = 1
+train = 0
 test = 1
 
-log = './log/lstm_unity_imputation'
+log = './log/lstm_unity'
 if not os.path.exists(log):
     os.makedirs(log)
 
 if __name__=="__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_path = './imputation_data/'
+    data_path = './pam_air_data/'
     list_station = os.listdir(data_path)
     save_results(["Target Station", "MAE", "RMSE", "MAPE", "R2_score", "MDAPE"], log)
     num_stations = 0
@@ -35,10 +36,10 @@ if __name__=="__main__":
     y_valid_full = []
     y_test_full = []
     sc_full = []
-    for station in list_station:
+    for station in tqdm(list_station, desc="Getting data"):
         num_stations += 1
         data_link = data_path + station
-        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, min = None, max = None)
+        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, start_date = "2021-05-01", end_date = "2021-11-01")
         x_train_full.append(x_train)
         x_valid_full.append(x_valid)
         x_test_full.append(x_test)

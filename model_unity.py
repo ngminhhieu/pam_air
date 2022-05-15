@@ -100,6 +100,7 @@ class Encoder(nn.Module):
     r2 = []
     loss_mdape = []
     for i in range(self.num_stations):
+      print(self.sc[i].min_)
       _p = y_predict[:, i]
       _y = y_original[:, i]
       _p -= self.sc[i].min_[0]
