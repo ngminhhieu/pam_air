@@ -5,17 +5,19 @@ import os
 import torch 
 
 #hyper parameters
-input_seq_len = 48
+input_seq_len = 24
 input_size = 3
-hidden_size = 64
-epochs = 200
+hidden_size = 128
+epochs = 1
 batch_size = 32
 learning_rate = 0.0001
 num_layers=1
 dropout=0
 cuda=True
+train = 1
+test = 1
 
-log = './log/imputation'
+log = './log/lstm_imputation'
 if not os.path.exists(log):
     os.makedirs(log)
 
@@ -31,10 +33,12 @@ if __name__=="__main__":
         #     continue
         data_link = data_path + station
         x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = 24, output_len = 1, min = None, max = None)
-        model = Encoder(cuda, input_seq_len, input_size, hidden_size, sc, epochs = epochs, batch_size = batch_size, learning_rate = learning_rate, num_layers=num_layers, dropout=dropout)
+        model = Encoder(log, cuda, input_size, hidden_size, sc, epochs = epochs, batch_size = batch_size, learning_rate = learning_rate, num_layers=num_layers, dropout=dropout)
         if cuda:
             model = model.cuda()
-        model.train(x_train, y_train, x_valid, y_valid)
-        loss_mae, loss_rmse, loss_mape, r2,loss_mdape, y_predict, y_original = model.test(x_test, y_test)
+        if train:
+            model.train(station, x_train, y_train, x_valid, y_valid)
+        if test:
+            loss_mae, loss_rmse, loss_mape, r2,loss_mdape, y_predict, y_original = model.test(station, x_test, y_test)
         save_results([station, loss_mae, loss_rmse, loss_mape, r2, loss_mdape], log)
         visualize(y_original, y_predict, log, "result_{}.png".format(station.split('.')[0]))
