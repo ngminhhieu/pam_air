@@ -9,15 +9,18 @@ from tqdm import tqdm
 input_seq_len = 24
 horizon = 1
 input_size = 3
-hidden_size = 32
-epochs = 1
+hidden_size = 16
+epochs = 100
 batch_size = 32
 learning_rate = 0.0001
 num_layers=1
 dropout=0
 cuda=True
-train = 0
+train = 1
 test = 1
+start_date = '21/05/2021 10:00:00'
+end_date = '15/12/2021 23:00:00'
+len_data = 4400
 
 log = './log/lstm_unity'
 if not os.path.exists(log):
@@ -25,7 +28,7 @@ if not os.path.exists(log):
 
 if __name__=="__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_path = './pam_air_data/'
+    data_path = './pam_air_data_loc/'
     list_station = os.listdir(data_path)
     save_results(["Target Station", "MAE", "RMSE", "MAPE", "R2_score", "MDAPE"], log)
     num_stations = 0
@@ -39,7 +42,7 @@ if __name__=="__main__":
     for station in tqdm(list_station, desc="Getting data"):
         num_stations += 1
         data_link = data_path + station
-        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, start_date = "2021-05-01", end_date = "2021-11-01")
+        x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, start_date = start_date, end_date = end_date, len_data = len_data)
         x_train_full.append(x_train)
         x_valid_full.append(x_valid)
         x_test_full.append(x_test)
