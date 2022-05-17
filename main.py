@@ -12,9 +12,9 @@ import torch
 horizon = 1
 input_seq_len = 48
 input_size = 3
-hidden_size = 16
+hidden_size = 64
 epochs = 100
-batch_size = 64
+batch_size = 32
 learning_rate = 0.0001
 num_layers=1
 dropout=0
@@ -26,6 +26,8 @@ fill = False
 start_date = '21/05/2021 10:00:00'
 end_date = '15/12/2021 23:00:00'
 len_data = 4400
+# start_date = None
+# end_date = None
 # len_data = None
 
 log = './log/lstm_unity'
@@ -56,9 +58,9 @@ if __name__=="__main__":
     train = int(sys.argv[2])
     test = int(sys.argv[3])
     cuda = sys.argv[4]
-    # if len(sys.argv) > 5:
-    #     input_features = sys.argv[5].split(',')
-    #     fill = sys.argv[6]
+    if len(sys.argv) > 5:
+        input_features = sys.argv[5].split(',')
+        fill = sys.argv[6]
     if cuda == 'True':
         cuda = True
     else:
@@ -68,6 +70,7 @@ if __name__=="__main__":
     # data_link = './imputation_data/S0000099-Phu-Vien.csv'
     # data_path = './pam_air_data/pam_air/'
     data_path = './pam_air_data_loc/'
+    # data_path = './data/ref/'
     list_station = os.listdir(data_path)
     save_results(["Target Station", "MAE", "RMSE", "MAPE", "R2_score", "MDAPE"], log)
 
@@ -129,5 +132,5 @@ if __name__=="__main__":
             station_name = station.split('.')[0]
             data_link = data_path + station
             x_train, x_valid, x_test, y_train, y_valid, y_test, sc = make_data_set(data_link, seq_len = input_seq_len, output_len = 1, start_date = start_date, end_date = end_date, len_data = len_data, input_feature = input_features, fill = fill)
-            model = EncoderDecoder(log, cuda, input_seq_len=input_seq_len,batch_size = batch_size, epochs = epochs,learning_rate = learning_rate, output_seq_len=1, input_size=input_size, output_size=1, hidden_size=hidden_size, num_layers=num_layers, dropout=dropout)
+            model = EncoderDecoder(log, cuda, sc, input_seq_len=input_seq_len,batch_size = batch_size, epochs = epochs,learning_rate = learning_rate, output_seq_len=1, input_size=input_size, output_size=1, hidden_size=hidden_size, num_layers=num_layers, dropout=dropout)
             run_model(model, x_train, y_train, x_valid, y_valid, x_test, y_test, [station], cuda = cuda, train = train, test = test, station_name = station_name)

@@ -62,7 +62,7 @@ class Decoder(nn.Module):
     return out, hidden_state
 
 class EncoderDecoder(nn.Module):
-  def __init__(self, log, device, input_seq_len=24,batch_size = 30, epochs = 30,learning_rate = 0.0001, output_seq_len=5, input_size=14, output_size=1, hidden_size=12, num_layers=1, dropout=0):
+  def __init__(self, log, device,sc, input_seq_len=24,batch_size = 30, epochs = 30,learning_rate = 0.0001, output_seq_len=5, input_size=14, output_size=1, hidden_size=12, num_layers=1, dropout=0):
     super(EncoderDecoder, self).__init__()
     self.log = log
     self.device = device
@@ -75,6 +75,7 @@ class EncoderDecoder(nn.Module):
     self.output_seq_len = output_seq_len
     self.hidden_size = hidden_size
     self.num_layers = num_layers
+    self.sc = sc
     self.dropout = dropout
     self.encoder = Encoder(device, self.input_size, self.hidden_size, self.num_layers, self.dropout)
     self.decoder = Decoder(device, self.output_size, self.hidden_size, self.num_layers, self.dropout)
@@ -122,7 +123,7 @@ class EncoderDecoder(nn.Module):
 
             optimizer.zero_grad()
             outputs = self.forward(x, self.batch_size)
-            batch_loss = criterion(outputs,  y)
+            batch_loss = criterion(outputs,  y.view(self.batch_size, self.output_seq_len, self.output_size))
             batch_loss.backward()
             optimizer.step()
             epoch_train_loss  += batch_loss.item()
@@ -139,7 +140,7 @@ class EncoderDecoder(nn.Module):
                     x = x.cuda()
                     y = y.cuda()
                   outputs = self.forward(x, self.batch_size)
-                  batch_loss = criterion(outputs, y)
+                  batch_loss = criterion(outputs, y.view(self.batch_size, self.output_seq_len, self.output_size))
                   epoch_val_loss += batch_loss.item()
               # val_loss = epoch_val_loss / len(valid_iterator)
           print(f'\t Train loss: {epoch_train_loss / n:.4f}')

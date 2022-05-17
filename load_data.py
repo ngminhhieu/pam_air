@@ -22,21 +22,24 @@ def get_data(data_link, start_date = None, end_date = None, len_data = None, inp
   # if input_feature is None:
   #   in_data = pd.read_csv(data_link)
   # else:
-  in_data = pd.read_csv(data_link)
-  # in_data.rename(columns = {list(in_data)[0]:'time'}, inplace=True)
+  in_data = pd.read_csv(data_link, usecols = input_feature)
+  in_data.rename(columns = {list(in_data)[0]:'time'}, inplace=True)
   in_data['time'] = pd.to_datetime(in_data['time'])
   if start_date is not None and end_date is not None:
     in_data = in_data.loc[(in_data['time'] > start_date) & (in_data['time'] < end_date)]
   # in_data.set_index('time', inplace=True)
-  # if fill:
-  #   in_data = in_data.fillna(value=in_data.mean())
+  if fill:
+    in_data = in_data.fillna(value=in_data.mean())
   in_data = in_data.drop('time', axis=1)
   #fill NA
 #   in_data.interpolate(method='ffill', limit_direction='forward', axis=0, inplace=True)
   #process outlier
-  in_data['PM2.5'] = process_outliers(in_data['PM2.5'])
-  in_data['humidity'] = process_outliers(in_data['humidity'])
-  in_data['temperature'] = process_outliers(in_data['temperature'])
+  # in_data['PM2.5'] = process_outliers(in_data['PM2.5'])
+  # in_data['humidity'] = process_outliers(in_data['humidity'])
+  # in_data['temperature'] = process_outliers(in_data['temperature'])
+  for col in in_data.columns:
+    in_data[col] = process_outliers(in_data[col])
+  
   if len_data is not None:
     in_data = in_data.iloc[:len_data]
   #make data set
